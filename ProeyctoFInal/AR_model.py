@@ -5,7 +5,6 @@ from pandas import concat
 from matplotlib import pyplot
 from sklearn.metrics import mean_squared_error
 import pandas as pd
-import pandas as pd
 from pandas import read_csv
 from matplotlib import pyplot
 from statsmodels.tsa.arima_model import ARIMA
@@ -46,8 +45,10 @@ def metodo_AR(series,training_percentage):
     error = mean_squared_error(test, predictions)
     return test, predictions, error
 
-
 def mean_absolute_percentage_error(y_true, y_pred): 
+    
+    
+    #print(y_true,y_pred)
     y_true, y_pred = np.array(y_true), np.array(y_pred)
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
@@ -63,4 +64,4 @@ pyplot.plot(test,label='Datos reales')
 pyplot.plot(predictions, color='red',label='Datos predecidos')
 plt.legend(loc='upper right')
 pyplot.show()
-print(mean_absolute_percentage_error(test,predictions));
+print("error porcentual absoluto medio = ",mean_absolute_percentage_error(test,predictions)/100);

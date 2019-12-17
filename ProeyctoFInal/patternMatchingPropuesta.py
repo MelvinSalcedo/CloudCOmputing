@@ -1,33 +1,138 @@
+import numpy as np
 from sklearn.metrics import mean_squared_error
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import pyplot
 from statsmodels.tsa.ar_model import AR
 import numpy as np
-#pattern matching algorithm performs 2 steps: Preprocess and Match. It returns the predicated list after performing the match
-'''
-KMP implementation
-    # a is bigger
-    # b is smaller
-'''
 
-def KMP(str_a, str_b):
-    return _KMP(str_a,str_b,0)
 
-def _KMP(str_a, str_b, offset_a):
-    """
-    :type offset_a: int # returns the starting index of matching text(smaller) in pattern(bigger)
-    """
-    if (len(str_a) - offset_a < len(str_b)):
+def Distance(PatternElement, PatternScale, DataElement, DataScale):
+    #print("***",PatternElement, PatternScale, DataElement, DataScale)
+
+    a=ord(PatternElement)
+    b=ord(PatternScale)
+    c=ord(DataElement)
+    d=ord(DataScale)
+    
+    t=a*b-c*d
+    #print("t = ",t)
+    return t
+    
+
+def CumulativeDistance(P, T, DataOffset):
+    patternScale = P[0]
+    dataScale = T[DataOffset]
+    length = len(P)
+    distance = 0
+    for index in range (length):
+        distance = distance + abs( ord(dataScale) * ord(P[index])
+        - ord(patternScale) * ord(T[index + DataOffset]) )
+    return distance
+
+def Calculate_prefix_approx(P, ACCEPT_INST_ERR):
+    phi = np.zeros(len(P))
+    
+    m = len(P)
+    phi[0] = -1
+    k = -1
+    scaleK = P[0]
+    scaleQ = P[1]
+    for q in range(1, (m-1)):
+        dist = Distance(P[k+1], scaleK, P[q], scaleQ)
+        maxDistance = ACCEPT_INST_ERR * ord(scaleQ) * ord(P[k+1])
+        while (k > -1 and dist > maxDistance):
+            k = phi[k]
+            dist = Distance(P[k+1], scaleK, P[q], scaleQ)
+            scaleQ = P[q - (k+1)]
+        if (dist <= ACCEPT_INST_ERR * ord(scaleQ) * ord(P[k+1])):
+            k = k+1
+        phi[q] = k
+    #print("phi = ",phi)
+    return phi
+
+
+def KMP_approx(T, P, ACCEPT_INST_ERR, ACCEPT_CUMUL_ERR):
+    print("------> ",T, P, ACCEPT_INST_ERR, ACCEPT_CUMUL_ERR )
+    patternSum=1
+    StoreSolution=1
+    phi = set()
+    n = len(T)
+    m = len(P)
+    phi = Calculate_prefix_approx(P,ACCEPT_INST_ERR)
+    q = -1
+    scaleP = P[0]
+    scaleT = T[0]
+    for i in range(0,n - 1):
+        dist = Distance(P[int(q+1)], scaleP, T[i], scaleT)
+        maxDist = ACCEPT_INST_ERR * ord(scaleT) * ord(P[int(q+1)])
+        while (q > -1 and dist > maxDist):
+            dist = Distance(P[q+1], scaleP, T[i], scaleT)
+            q = phi[q]
+            scaleT = T[i - (q+1)]
+            maxDist = ACCEPT_INST_ERR * scaleT * P[q+1]
+
+        if (dist <= maxDist):
+            q = q+1
+
+        if (q == m-1):
+            dist = CumulativeDistance(P, T, i - m + 1)
+            maxDist = ACCEPT_CUMUL_ERR * patternSum * ord(scaleT)
+            if (dist <= maxDist):
+                StoreSolution=(dist / ord(scaleT), i - m + 1)
+            q = int(phi[q])
+            suma=int(q+1)
+            scaleP = P[suma]
+            scaleT = T[i - suma]
+    print(q,n,m,phi,n-m)
+    return n-m
+    if n==m and T[m-1] == P[i-1]:
+        return (q+1) - m
+    else:
         return -1
-    for i in range(offset_a, offset_a + len(str_b), 1):
-        if (str_b[i - offset_a] != str_a[i]):
-            return _KMP(str_a, str_b, i+1)
-    return offset_a
 
-'''
-Calculating euclidean distance of a character from a string character
-'''
+"""
+def get_prefix_table(patron):
+    prefix_set = set()
+    m = len(patron)
+    prefix_table = [0]*m
+    delimeter = 1
+    while(delimeter<m):
+        prefix_set.add(patron[:delimeter])
+        j = 1
+        while(j<delimeter+1):
+            if patron[j:delimeter+1] in prefix_set:
+                prefix_table[delimeter] = delimeter - j + 1
+                break
+            j += 1
+        delimeter += 1
+        
+    print(prefix_table)
+    return prefix_table
+
+def strstr(texto, patron):
+    # m: denoting the position within S where the prospective match for W begins
+    # i: denoting the index of the currently considered character in W.
+    texto_len = len(texto)
+    patron_len = len(patron)
+    if (patron_len > texto_len) or (not texto_len) or (not patron_len):
+        return -1
+    prefix_table = get_prefix_table(patron)
+    m = i = 0
+    while((i<patron_len) and (m<texto_len)):
+        if texto[m] == patron[i]:
+            i += 1
+            m += 1
+        else:
+            if i != 0:
+                i = prefix_table[i-1]
+            else:
+                m += 1
+    if i==patron_len and texto[m-1] == patron[i-1]:
+        return m - patron_len
+    else:
+        return -1
+"""
 def euclidean_distance(str, ch):
     sum=0
     #print ("Euclidean")
@@ -110,15 +215,15 @@ def pattern_matching(cpu_workload):
     s_size = len(z) - 1
     
     while (num != 0):
+        print("++++++++",num)
         length = len(C_his_pattern_list[num])
         # s is smaller string, C_his_pattern_list[num-1] is bigger one
-        tag = KMP(C_his_pattern_list[num - 1], z)
+        #tag = KMP(C_his_pattern_list[num - 1], z)
+        tag = KMP_approx(z,C_his_pattern_list[num - 1],1,1)
         print("tag= ",tag)
         #print("tag = ",tag)
-
         if (tag != -1):
             return (C_his_pattern_list[num])
-
         else:
             dis[num] = float('inf')
             for i in range(0, length - s_size):
@@ -126,8 +231,7 @@ def pattern_matching(cpu_workload):
                 #print("Dis_l")
                 #print(dis_l)
                 if dis_l < dis[num]:
-                    dis[num] = dis_l
-                    
+                    dis[num] = dis_l   
         num -= 1
         
     
@@ -176,7 +280,7 @@ def metodo_Dm(cpu_workload,Y,Z,output_list):
         if (Z[t]==output_list[0] ):#or Z[t]==output_list[1] or Z[t]==output_list[2]):
             predictions.append(cpu_workload[t])
         else:
-            predictions.append(-yhat+4)
+            predictions.append(-yhat+3.5)
         history.append(obs)
     	#print('predicted=%f, expected=%f' % (yhat, obs))
     error = mean_squared_error(test, predictions)
@@ -220,6 +324,7 @@ def predecir(cpu_workload,output_list):
 def mean_absolute_percentage_error(y_true, y_pred): 
     y_pred= [round(x) for x in y_pred]
     y_true, y_pred = np.array(y_true), np.array(y_pred)
+    
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
 if __name__ == "__main__":

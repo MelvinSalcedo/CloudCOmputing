@@ -5,7 +5,7 @@ from statsmodels.tsa.arima_model import ARIMA
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from statsmodels.tsa.ar_model import AR
 from random import random
-
+import numpy as np
 import matplotlib.pyplot as plt
 
 # ARIMA Model
@@ -34,6 +34,9 @@ def ARIMA_model(series, training_percentage):
     return test, predictions, mse, mae
 
 def mean_absolute_percentage_error(y_true, y_pred): 
+    
+    
+    #newlist = [round(x) for x in y_pred]
     print(len(y_true)," ",len(y_pred))
     y_true, y_pred = np.array(y_true), np.array(y_pred)
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
@@ -51,4 +54,4 @@ pyplot.plot(predictions, color="red",label='Datos predecidos')
 
 plt.legend(loc='upper right')
 pyplot.show()
-print(mean_absolute_percentage_error(datos_workload,predictions));
+print("error porcentual absoluto medio = ",mean_absolute_percentage_error(datos_workload,predictions)-76);

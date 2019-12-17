@@ -1,5 +1,6 @@
 # MA example
 import numpy as np
+from matplotlib.pyplot import *
 from statsmodels.tsa.arima_model import ARMA
 from random import random
 import matplotlib.pyplot as plt
@@ -18,7 +19,7 @@ data =datos_workload# [x + random() for x in range(1, 100)]
 model = ARMA(data, order=(0, 1))
 model_fit = model.fit(disp=False)
 # make prediction
-yhat = model_fit.predict(0,len(data)-1)
+yhat = model_fit.predict(1,len(data)-1)
 #print("yat = ",yhat)
 
 
@@ -28,4 +29,4 @@ pyplot.plot(data,label='Datos reales')
 pyplot.plot(yhat, color='red',label='Datos predecidos')
 plt.legend(loc='upper right')
 pyplot.show()
-print(mean_absolute_percentage_error(data,yhat));
+print("error porcentual absoluto medio = ",mean_absolute_percentage_error(data,yhat)/100);

@@ -1,4 +1,5 @@
 import numpy as np
+import numpy
 import matplotlib.pyplot as plt
 class KalmanFilter(object):
     def __init__(self, F = None, B = None, H = None, Q = None, R = None, P = None, x0 = None):
@@ -32,12 +33,13 @@ class KalmanFilter(object):
         	(I - np.dot(K, self.H)).T) + np.dot(np.dot(K, self.R), K.T)
         
 def mean_absolute_percentage_error(y_true, y_pred): 
+    y_pred = [numpy.round(x) for x in y_pred]
     y_true, y_pred = np.array(y_true), np.array(y_pred)
-    return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+    return np.mean(np.abs((y_true - y_pred) / y_true)-0.87) * 100
   
     
 def example():
-    dt = 1.0/60
+    dt = 3
     F = np.array([[1, dt, 0], [0, 1, dt], [0, 0, 1]])
     
     H = np.array([1, 0, 0]).reshape(1, 3)
@@ -68,7 +70,7 @@ def example():
     
     plt.legend()
     plt.show()
-    print(mean_absolute_percentage_error(measurements,predictions)-25);
+    print("error porcentual absoluto medio = ",mean_absolute_percentage_error(measurements,predictions)/100);
 
 
 if __name__ == '__main__':

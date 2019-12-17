@@ -111,6 +111,7 @@ testPredictPlot1[len(trainPredict)+(look_back*2)+1:len(dataset)-1, :] = testPred
 def mean_absolute_percentage_error(y_true, y_pred): 
     
     print(len(y_true), len(y_pred))
+    y_pred = [numpy.round(x) for x in y_pred]
     #print(y_true, y_pred)
     y_true, y_pred = np.array(y_true), np.array(y_pred)
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
@@ -125,4 +126,4 @@ plt.show()
 
 
 
-print(mean_absolute_percentage_error(dataset,testPredictPlot1)-24);
+print(mean_absolute_percentage_error(dataset,testPredictPlot1));

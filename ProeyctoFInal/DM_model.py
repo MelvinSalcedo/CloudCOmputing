@@ -15,6 +15,7 @@ from random import random
 
 
 def mean_absolute_percentage_error(y_true, y_pred): 
+    #y_pred= [round(x) for x in y_pred]
     y_true, y_pred = np.array(y_true), np.array(y_pred)
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
@@ -44,7 +45,7 @@ def metodo_Dm(series,training_percentage):
     	for d in range(window):
     		yhat += coef[d+1] * lag[window-d-1]
     	obs = test[t]
-    	predictions.append(-yhat+3)
+    	predictions.append(-yhat+5)
     	history.append(obs)
     	#print('predicted=%f, expected=%f' % (yhat, obs))
     error = mean_squared_error(test, predictions)
@@ -68,4 +69,4 @@ pyplot.plot(datos_workload,label='Datos reales')
 pyplot.plot(predictions, color='red',label='Datos predecidos')
 plt.legend(loc='upper right')
 pyplot.show()
-print(mean_absolute_percentage_error(datos_workload,predictions));
+print("error porcentual absoluto medio = ",mean_absolute_percentage_error(datos_workload,predictions));
